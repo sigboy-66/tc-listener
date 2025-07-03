@@ -11,7 +11,7 @@ if len(sys.argv) > 1:
 
 
 server_ip = '127.0.0.1'  # Change to server's IP if needed
-server_port = 4444
+server_port = 4445
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
     client_socket.connect((server_ip, server_port))
