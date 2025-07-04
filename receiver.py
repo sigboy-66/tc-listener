@@ -3,21 +3,28 @@ import sys
 from datetime import datetime
 
 if len(sys.argv) != 2:
-    print("Usage: python receiver.py <log_file_path>")
+    print("Usage: python receiver.py <log_file>")
     sys.exit(1)
 
-log_file_path = sys.argv[1]
+log_file = sys.argv[1]
 ip = '0.0.0.0'
-port = 4445
+port = 4446
 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
+try:
+    heartbeat_log = open(log_file, 'a')
+except(IOError) as error:
+    print(f"Error: Can't write to {log_file}: {error}")
+    sys.exit(1)
+
+with heartbeat_log, socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
     server_socket.bind((ip, port))
     server_socket.listen()
-    print(f"Server listening on {ip}:{port}")
+    print(f"Listening on {ip}:{port}")
 
     connection, address = server_socket.accept()
-    with connection, open(log_file_path, 'a') as log_file:
+    with connection:
         print(f"Connected by {address}")
+        # Loop until sender breaks connection
         while True:
             heartbeat = connection.recv(1024)
             if not heartbeat:
@@ -27,5 +34,5 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
             timestamp = datetime.now().isoformat()
             log_heartbeat = f"{timestamp} - {address[0]}:{address[1]} - {message}\n"
             print(log_heartbeat.strip())
-            log_file.write(log_heartbeat)
-            log_file.flush()
+            heartbeat_log.write(log_heartbeat)
+            heartbeat_log.flush()
