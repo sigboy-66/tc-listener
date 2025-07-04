@@ -10,12 +10,12 @@ if len(sys.argv) > 1:
     loop_count = int(sys.argv[1])
 
 
-server_ip = '127.0.0.1'  # Change to server's IP if needed
-server_port = 4446
+receiver_ip = '127.0.0.1'  # Change to server's IP if needed
+receiver_port = 4446
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-    client_socket.connect((server_ip, server_port))
-    print(f"Connected to server at {server_ip}:{server_port}")
+    client_socket.connect((receiver_ip, receiver_port))
+    print(f"Connected to server at {receiver_ip}:{receiver_port}")
 
     try:
         for heartbeat_num in range(loop_count):
