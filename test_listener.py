@@ -25,11 +25,18 @@ def get_time_stamp(receiver_log_line):
     time_stamp = receiver_log_line[time_stamp_index:].replace("\n", "")
     return time_stamp
 
+def get_correct_pyhthon():
+    """select python 2 if not windows"""
+    if os.name != "nt":
+        return "python3"
+    else:
+        return "python"
+
 def test_heartbeat_logging():
     """Test basic heartbeat logging to file."""
     log_file = "listener1.log"
     server = subprocess.Popen(
-        ["python", receiver_exe, log_file],
+        [get_correct_pyhthon(), receiver_exe, log_file],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True
@@ -39,7 +46,7 @@ def test_heartbeat_logging():
     time.sleep(2.5)
     print(f"Server.poll() is {server.poll()}")
     client = subprocess.Popen(
-        ["python", sender_exe],
+        [get_correct_pyhthon(), sender_exe],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True
@@ -60,7 +67,7 @@ def test_sender_receives_all_heartbeats():
     """Send 5 heart beats see if 5 are logged"""
     log_file = "listener2.log"
     server = subprocess.Popen(
-        ["python", receiver_exe, log_file],
+        [get_correct_pyhthon(), receiver_exe, log_file],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True
@@ -68,7 +75,7 @@ def test_sender_receives_all_heartbeats():
     print("sleep 2.5 sec for receiver to be up")
     time.sleep(2.5)
     client = subprocess.Popen(
-        ["python", sender_exe, "5"],
+        [get_correct_pyhthon(), sender_exe, "5"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True
@@ -99,7 +106,7 @@ def test_receiver_heartbeats_received_timestamped_every_5_seconds_from_sender():
     log_file = "listener3.log"
 
     server = subprocess.Popen(
-        ["python", receiver_exe, log_file],
+        [get_correct_pyhthon(), receiver_exe, log_file],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True
@@ -107,7 +114,7 @@ def test_receiver_heartbeats_received_timestamped_every_5_seconds_from_sender():
 
     time.sleep(2.5)
     client = subprocess.Popen(
-        ["python", sender_exe, "5"],
+        [get_correct_pyhthon(), sender_exe, "5"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True
@@ -141,7 +148,7 @@ def test_receiver_heartbeats_received_timestamped_every_5_seconds_from_sender():
 def test_missing_log_path_to_reciever():
     """Test server fails if log path is missing."""
     result = subprocess.run(
-        ["python", receiver_exe],
+        [get_correct_pyhthon(), receiver_exe],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True
@@ -152,7 +159,7 @@ def test_missing_log_path_to_reciever():
 def test_sender_no_reciever():
     """Sender should fail to connect if server is down."""
     result = subprocess.run(
-        ["python", sender_exe],
+        [get_correct_pyhthon(), sender_exe],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
@@ -162,10 +169,13 @@ def test_sender_no_reciever():
 
 def test_log_permission_error():
     """Test server exits if it cannot write to log path."""
-    restricted_path = "/root/forbidden_log.txt" if os.name != "nt" else "C:\\Windows\\System32\\forbidden_log.txt"
+    if os.name != "nt":
+        restricted_path = "/root/forbidden_log.txt"
+    else:
+        restricted_path = "C:\\Windows\\System32\\forbidden_log.txt"
 
     server = subprocess.Popen(
-        ["python", receiver_exe, restricted_path],
+        [get_correct_pyhthon(), receiver_exe, restricted_path],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True
